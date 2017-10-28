@@ -20,8 +20,8 @@ noble.on('stateChange', function(state) {
 noble.on('discover', function(peripheral) {
     // console.log("found: ", peripheral.advertisement.localName, ". and peripheral.id: ", peripheral.id);
     // peripheral.id = "dfa4c6667ca14d778009d8675507813c";
-    // if(peripheral.advertisement.localName === "Concussion" || peripheral.advertisement.localName === "ARDUINO 101-348F") {
-    if(peripheral.id === peripheralId) {
+    if(peripheral.advertisement.localName === "BatteryMonitor") {
+    // if(peripheral.id === peripheralId) {
 
         peripheral.connect(function(error) {
             if(error) console.log(error);
