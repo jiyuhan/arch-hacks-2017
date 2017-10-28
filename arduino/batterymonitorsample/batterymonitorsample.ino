@@ -4,20 +4,22 @@
 */
 
 /*
- * Sketch: BatteryMonitor.ino
- *
- * Description:
- *     This sketch example partially implements the standard Bluetooth
- *   Low-Energy Battery service and connection interval paramater update.
- *
- *   For more information:
- *     https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx
- *
- */
+   Sketch: BatteryMonitor.ino
+
+   Description:
+       This sketch example partially implements the standard Bluetooth
+     Low-Energy Battery service and connection interval paramater update.
+
+     For more information:
+       https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx
+
+*/
 
 #include <CurieBLE.h>
 
-
+#include <Wire.h>
+#include "MMA7660.h"
+MMA7660 accelemeter;
 
 BLEService batteryService("6e400001b5a3f393e0a9e50e24dcca9e"); // BLE Battery Service
 
@@ -33,7 +35,7 @@ void setup() {
   Serial.begin(9600);    // initialize serial communication
   pinMode(13, OUTPUT);   // initialize the LED on pin 13 to indicate when a central is connected
 
-  
+  accelemeter.init();
   /* Set a local name for the BLE device
      This name will appear in advertising packets
      and can be used by remote devices to identify this BLE device
@@ -94,6 +96,17 @@ void updateBatteryLevel() {
   */
   int battery = analogRead(A0);
   int batteryLevel = map(battery, 0, 1023, 0, 100);
+
+  float ax, ay, az;
+  char buffer[30];
+  accelemeter.getAcceleration(&ax, &ay, &az);
+  sprintf(buffer, "x%f", ax);
+  Serial.println(buffer);
+  sprintf(buffer, "y%f", ay);
+  Serial.println(buffer);
+  sprintf(buffer, "z%f", az);
+  Serial.println(buffer);
+  Serial.println("*************");
 
   Serial.print("Battery Level % is now: "); // print it
   Serial.println(batteryLevel);
