@@ -40,7 +40,7 @@ noble.on('discover', function(peripheral) {
                     console.log('saved readChar');
                     // Handle data events for characteristic
                     mycharacteristic.on('data', function(data, isNotification) {
-                       console.log(data.readUInt8(0));
+                       console.log(data.toString('ascii'));
                     });
                 });
             });
