@@ -1,22 +1,17 @@
 var noble = require('noble');
-var mysql = require('mysql');
-var connection = mysql.createConnection({
-  host: 'phly.c7jx0v6pormd.us-east-1.rds.amazonaws.com',
-  user: 'phly',
-  password: 'phlyisthebest',
-  port: '3306',
-  database : 'phly'
-});
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: 8000});
+
+// Broadcast to all.
+wss.broadcast = function broadcast(data) {
+    wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(data);
+        }
+    });
+};
 
 var isDatabaseConnected = false;
-
-connection.connect(function(err) {
-  if (err) {
-    console.error('error connecting: ' + err.stack);
-    return;
-  }
-  isDatabaseConnected = true;
-});
 
 var peripheralId = 'f42e07780be14c878c360575c7d13e18';
 var serviceUuid = '6e400001b5a3f393e0a9e50e24dcca9e';
@@ -75,15 +70,8 @@ noble.on('discover', function(peripheral) {
                             gz = parseFloat(realData);
                             // data format: player_id result timestamp
                             console.log(peripheral.advertisement.localName, '\t', gx, '\t', gy, '\t', gz, '\t', ax, '\t', ay, '\t', az, '\t', new Date().getTime());
-                            if(isDatabaseConnected) {
-                              var sql = "INSERT INTO accel_data (player_id, game_id, time_stamp, ax, ay, az, gx, gy, gz) VALUES ?";
-                              var values = [
-                                  [1, 2, new Date().getTime() & 0xFFFFFFFF, ax, ay, az, gx, gy, gz]
-                              ];
-                              connection.query(sql, [values], function (err, result) {
-                                if (err) throw err;
-                              });
-                            }
+                            var organizedData = new Date().getTime() + "," + Math.sqrt(ax * ax + ay * ay + az * az);
+                            wss.broadcast(organizedData);
                         }
                     });
                 });
