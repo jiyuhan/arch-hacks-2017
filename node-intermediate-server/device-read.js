@@ -1,5 +1,17 @@
 var noble = require('noble');
 var mysql = require('mysql');
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: 8000});
+
+// Broadcast to all.
+wss.broadcast = function broadcast(data) {
+    wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(data);
+        }
+    });
+};
+
 var connection = mysql.createConnection({
   host: 'phly.c7jx0v6pormd.us-east-1.rds.amazonaws.com',
   user: 'phly',
@@ -75,6 +87,8 @@ noble.on('discover', function(peripheral) {
                             gz = parseFloat(realData);
                             // data format: player_id result timestamp
                             console.log(peripheral.advertisement.localName, '\t', gx, '\t', gy, '\t', gz, '\t', ax, '\t', ay, '\t', az, '\t', new Date().getTime());
+                            var organizedData = new Date().getTime() + "," + Math.sqrt(ax * ax + ay * ay + az * az);
+                            wss.broadcast(organizedData);
                             if(isDatabaseConnected) {
                               var sql = "INSERT INTO accel_data (player_id, game_id, time_stamp, ax, ay, az, gx, gy, gz) VALUES ?";
                               var values = [

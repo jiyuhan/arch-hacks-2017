@@ -3,11 +3,13 @@ smoothie.streamTo(document.getElementById("mycanvas"), 1000);
 
 // Data
 var line1 = new TimeSeries();
+//var line2 = new TimeSeries();
 
 // Add a random value to each line every second
 var setData = function(time, data) {
     setInterval(function() {
         line1.append(time, data);
+        //line2.append(time, data);
     }, 1000);
 }
 

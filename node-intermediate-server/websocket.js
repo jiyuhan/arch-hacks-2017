@@ -12,6 +12,6 @@ wss.broadcast = function broadcast(data) {
 
 while(1) {
     setTimeout(function() {
-        wss.broadcast("hello")
+        wss.broadcast("hello");
     }, 200);
 }
