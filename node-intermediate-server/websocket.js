@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 80});
+const wss = new WebSocket.Server({ port: 8000});
 
 // Broadcast to all.
 wss.broadcast = function broadcast(data) {
@@ -11,5 +11,7 @@ wss.broadcast = function broadcast(data) {
 };
 
 while(1) {
-    setTimeout(wss.broadcast(organizedData), 20);
+    setTimeout(function() {
+        wss.broadcast("hello")
+    }, 200);
 }
