@@ -24,7 +24,7 @@ void setup() {
      and can be used by remote devices to identify this BLE device
      The name can be changed but maybe be truncated based on space left in advertisement packet
   */
-  BLE.setLocalName("BatteryMonitor");
+  BLE.setLocalName("Concussion");
   BLE.setAdvertisedService(batteryService);  // add the service UUID
   batteryService.addCharacteristic(batteryLevelChar); // add the battery level characteristic
   BLE.addService(batteryService);   // Add the BLE Battery service
@@ -61,9 +61,9 @@ void loop() {
     while (central.connected()) {
       long currentMillis = millis();
       // if 200ms have passed, check the battery level:
-      if (currentMillis - previousMillis >= 200) {
+      if (currentMillis - previousMillis >= 50) {
         previousMillis = currentMillis;
-        updateBatteryLevel();
+        updateBatteryLevel(currentMillis);
       }
     }
     // when the central disconnects, turn off the LED:
@@ -73,7 +73,7 @@ void loop() {
   }
 }
 
-void updateBatteryLevel() {
+void updateBatteryLevel(long currentMills) {
 
   float ax, ay, az;
   char buffer[10];
@@ -87,5 +87,4 @@ void updateBatteryLevel() {
   sprintf(buffer, "z%f", az);
   Serial.println(buffer);
   batteryLevelChar.setValue((unsigned char *)buffer, 20);  // and update the battery level characteristic
-  Serial.println("*************");
 }
