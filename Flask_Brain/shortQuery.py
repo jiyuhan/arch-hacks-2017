@@ -12,14 +12,19 @@ def timeQu(timeZero, interval):
                                  password='phlyisthebest',
                                  db='phly',
                                  port=3306,
-                                 cursorclass=pymysql.cursors.DictCursor)
+                                 cursorclass=pymysql.cursors.DictCursor
+                                 )
 
     try:
 
         with connection.cursor() as cursor:
-            fut = timeZero+interval
-            cursor.execute("SELECT * FROM accel_data WHERE `time_stamp` < {} AND `time_stamp` > {}".format(fut,timeZero) )
-            return cursor.fetchall()
+            lowerBound = timeZero - (interval / 2)
+            upperBound = timeZero + (interval / 2)
+            cursor.execute("SELECT * FROM accel_data WHERE `time_stamp` < {} AND `time_stamp` > {}".format(upperBound,lowerBound) )
+
+            oneMinuteData = cursor.fetchall()
+            if type(oneMinuteData) != None:
+                return oneMinuteData
 
     finally:
         connection.close()
@@ -29,7 +34,7 @@ def timeQu(timeZero, interval):
 
 def meanData(timeZero, interval):
     t = timeQu(timeZero, interval)
-    print(len(t))
+    print(t)
     ax =[]
     ay=[]
     az=[]
@@ -37,7 +42,7 @@ def meanData(timeZero, interval):
     gy=[]
     gz=[]
 
-    #For one minute
+    #For one second
     for row in t:
         ax.append(float(row['ax']))
         ay.append(float(row['ay']))

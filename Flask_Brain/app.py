@@ -16,16 +16,32 @@ app.config['MYSQL_DATABASE_HOST'] = 'phly.c7jx0v6pormd.us-east-1.rds.amazonaws.c
 mysql.init_app(app)
 
 
-def timeZ():
+def timeZ(traceTime):
+
+    print("time for trace is {}".format(traceTime))
+    t = traceTime & 0xFFFFFFFF
+    print("trace time truncated is {}".format(t))
     cursor = mysql.get_db().cursor()
-    cursor.execute("SELECT `time_stamp` FROM accel_data")
-    return float(cursor.fetchone()[0])
+    lowerBound = traceTime - 2000
+    upperBound = traceTime + 2000
+    cursor.execute("SELECT time_stamp FROM `accel_data` WHERE time_stamp < {} AND time_stamp > {}".format(upperBound, lowerBound))
+    if cursor.fetchone() is not None:
+        checkedTime = cursor.fetchone()[0]
+        print("time queried from the trace is {}".format(checkedTime))
+        return checkedTime
+    return traceTime
+
 
 
 @app.route('/OneSecAvr', methods=['POST'])
 def oneSecData():
-    zero = timeZ()
-    print(zero)
+    t = int(time.time() * 1000)
+    zero = timeZ(t)
+    while t == zero:
+        t = t - 4000
+        zero = timeZ(t)
+    zero = t
+    print("The time for query is {}".format(zero))
     avgArr = shortQuery.meanData(zero,1000)
     data = []
     mag = mathUtl.magnitude(avgArr[0], avgArr[1], avgArr[2])
@@ -33,11 +49,12 @@ def oneSecData():
     concProb = mathUtl.concussion_probability(mag, gyro)
 
     x= zero
-    while x < zero+10000:
+    while x != 0:
         avgArr = shortQuery.meanData(x, 1000)
-        print(x)
+        # print(x)
         data.append(mathUtl.magnitude(avgArr[0],avgArr[1],avgArr[2]))
-        x+=500
+
+        x = timeZ(x)
 
     return jsonify({'name': 'Paul Ruales', 'position':'QB','concussion_risk':concProb,
                    'data':data })
@@ -47,10 +64,12 @@ def oneSecData():
 
 @app.route('/')
 def returnData():
-    zero = timeZ()
+    t = int(time.time() * 1000)
+    zero = timeZ(t)
     cursor = mysql.get_db().cursor()
-    cursor.execute("SELECT * FROM accel_data")
+    cursor.execute("SELECT * FROM `accel_data`")
     data = cursor.fetchall()
+    #print(jsonify(data))
     out = [x for x in data ]
     return jsonify(out)
 
