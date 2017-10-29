@@ -70,9 +70,9 @@ noble.on('discover', function(peripheral) {
                             // data format: player_id result timestamp
                             console.log(peripheral.advertisement.localName, '\t', result, '\t', new Date().getTime());
                             if(isDatabaseConnected) {
-                              var sql = "INSERT INTO accel_data (player_id, game_id, result, time_stamp) VALUES ?";
+                              var sql = "INSERT INTO accel_data (player_id, game_id, result, time_stamp, x, y, z) VALUES ?";
                               var values = [
-                                  [1, 2, result, new Date().getTime()]
+                                  [1, 2, result, new Date().getTime(), x, y, z]
                               ];
                               connection.query(sql, [values], function (err, result) {
                                 if (err) throw err;
