@@ -5,6 +5,7 @@
   "main": "device-search.js",
   "dependencies": {
     "axios": "^0.17.0",
+    "brain": "^0.7.0",
     "mysql": "^2.15.0",
     "noble": "^1.8.1",
     "pg": "7.3.0"

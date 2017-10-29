@@ -1,8 +1,7 @@
 #include <CurieBLE.h>
 
 #include <Wire.h>
-#include "MMA7660.h"
-MMA7660 accelemeter;
+#include "CurieIMU.h"
 
 BLEService batteryService("6e400001b5a3f393e0a9e50e24dcca9e"); // BLE Battery Service
 
@@ -16,9 +15,16 @@ long previousMillis = 0;  // last time the battery level was checked, in ms
 
 void setup() {
   Serial.begin(9600);    // initialize serial communication
-  pinMode(13, OUTPUT);   // initialize the LED on pin 13 to indicate when a central is connected
 
-  accelemeter.init();
+  // initialize device
+  Serial.println("Initializing IMU device...");
+  CurieIMU.begin();
+
+  // Set the accelerometer range to 250 degrees/second
+  CurieIMU.setGyroRange(250);
+
+  // Set the accelerometer range to 16 G
+  CurieIMU.setAccelerometerRange(16);
   /* Set a local name for the BLE device
      This name will appear in advertising packets
      and can be used by remote devices to identify this BLE device
@@ -74,17 +80,37 @@ void loop() {
 }
 
 void updateBatteryLevel(long currentMills) {
+  float gx, gy, gz; //scaled Gyro values
+  float ax, ay, az;   //scaled accelerometer values
+  char buffer[20];
+  
+  // read gyro measurements from device, scaled to the configured range
+  CurieIMU.readGyroScaled(gx, gy, gz);
 
-  float ax, ay, az;
-  char buffer[10];
-  accelemeter.getAcceleration(&ax, &ay, &az);
-  sprintf(buffer, "x%f", ax);
+  sprintf(buffer, "gx%f", gx);
   Serial.println(buffer);
   batteryLevelChar.setValue((unsigned char *)buffer, 20);  // and update the battery level characteristic
-  sprintf(buffer, "y%f", ay);
+  sprintf(buffer, "gy%f", gy);
   Serial.println(buffer);
   batteryLevelChar.setValue((unsigned char *)buffer, 20);  // and update the battery level characteristic
-  sprintf(buffer, "z%f", az);
+  sprintf(buffer, "gz%f", gz);
+  Serial.println(buffer);
+  batteryLevelChar.setValue((unsigned char *)buffer, 20);  // and update the battery level characteristic
+
+
+
+  // read accelerometer measurements from device, scaled to the configured range
+  CurieIMU.readAccelerometerScaled(ax, ay, az);
+
+  // read accelerometer measurements from device, scaled to the configured range
+  CurieIMU.readAccelerometerScaled(ax, ay, az);
+  sprintf(buffer, "ax%f", ax);
+  Serial.println(buffer);
+  batteryLevelChar.setValue((unsigned char *)buffer, 20);  // and update the battery level characteristic
+  sprintf(buffer, "ay%f", ay);
+  Serial.println(buffer);
+  batteryLevelChar.setValue((unsigned char *)buffer, 20);  // and update the battery level characteristic
+  sprintf(buffer, "az%f", az);
   Serial.println(buffer);
   batteryLevelChar.setValue((unsigned char *)buffer, 20);  // and update the battery level characteristic
 }
